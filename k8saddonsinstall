@@ -81,6 +81,8 @@ echo ""
 echo "*** VERIFYING INGRESS NGINX... ***"
 echo ""
 
+sleep 30
+
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
