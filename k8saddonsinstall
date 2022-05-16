@@ -104,12 +104,12 @@ echo ""
 echo "*** VERIFYING KUBEVIRT... ***"
 echo ""
 
-sleep 30
+sleep 60
 
 kubectl wait --namespace kubevirt\
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=kubevirt \
-  --timeout=90s
+  --timeout=120s
 
 kubectl get pods -n kubevirt
 
