@@ -1,0 +1,277 @@
+#!/bin/bash
+
+## PARAMETER HELP FUNCTION
+helpFunction()
+{
+   echo ""
+   echo "Usage: $0 -s NFS server address -p NFS data path"
+   echo -e "\t-s NSF server address"
+   echo -e "\t-p NFS data path"
+   exit 1 # Exit script after printing help
+}
+
+while getopts "s:p:" opt
+do
+   case "$opt" in
+      s ) export nfsServer="$OPTARG" ;;
+      p ) export nfsPath="$OPTARG" ;;
+      ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
+   esac
+done
+
+### Print helpFunction in case parameters are empty
+if [ -z "$nfsServer" ] || [ -z "$nfsPath" ]
+then
+   echo "WARNING: Some or all of the parameters are empty";
+   helpFunction
+fi
+
+### Begin script in case all parameters are correct
+echo ""
+echo "*** READY TO START INSTALLATION ***"
+echo ""
+echo "- NFS server address is $nfsServer"
+echo "- NFS path is $nfsPath"
+echo ""
+
+sudo apt-get update
+
+echo ""
+echo "*** INSTALLING NFS PROVISIONER... ***"
+echo ""
+
+curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
+sudo apt-get install apt-transport-https --yes
+echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+
+sudo apt-get update
+
+sudo apt-get install -y helm
+
+helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+
+helm install nfs-subdir-external-provisioner \
+nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+--set nfs.server=$nfsServer \
+--set nfs.path=$nfsPath \
+--set storageClass.name=nfs-default \
+--set storageClass.defaultClass=true \
+--set storageClass.onDelete=true \
+--set storageClass.reclaimPolicy=Delete
+
+echo ""
+echo "*** VERIFYING NFS PROVISIONER... ***"
+echo ""
+
+kubectl get storageclass nfs-default
+kubectl describe storageclass nfs-default
+
+echo ""
+echo "*** INSTALLING INGRESS NGINX... ***"
+echo ""
+
+curl -s -o ingress-nginx.yaml https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/baremetal/deploy.yaml
+sed -i 's+    targetPort: https+    targetPort: https\n    nodePort: 30443+g' ingress-nginx.yaml
+kubectl apply -f ingress-nginx.yaml 
+
+kubectl get ingressclasses -n ingress-nginx
+kubectl -n ingress-nginx annotate ingressclasses nginx ingressclass.kubernetes.io/is-default-class="true"
+
+echo ""
+echo "*** VERIFYING INGRESS NGINX... ***"
+echo ""
+
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=90s
+
+kubectl get pods --namespace=ingress-nginx
+
+echo ""
+echo "*** INSTALLING KUBEVIRT... ***"
+echo ""
+
+export VERSION=$(curl -s https://api.github.com/repos/kubevirt/kubevirt/releases | grep tag_name | grep -v -- '-rc' | head -1 | awk -F': ' '{print $2}' | sed 's/,//' | xargs)
+echo $VERSION
+
+kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-operator.yaml
+kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-cr.yaml
+
+echo ""
+echo "*** VERIFYING KUBEVIRT... ***"
+echo ""
+
+sleep 30
+
+kubectl wait --namespace kubevirt\
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=kubevirt \
+  --timeout=90s
+
+kubectl get pods -n kubevirt
+
+echo ""
+echo "*** INSTALLING CDI... ***"
+echo ""
+
+export VERSION=$(curl -sL https://api.github.com/repos/kubevirt/containerized-data-importer/releases | grep tag_name | grep -v -- '-rc' | head -1 | awk -F': ' '{print $2}' | sed 's/,//' | xargs)
+echo $VERSION
+
+kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/${VERSION}/cdi-operator.yaml
+kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/${VERSION}/cdi-cr.yaml
+
+echo ""
+echo "*** VERIFYING CDI... ***"
+echo ""
+
+sleep 30
+
+kubectl wait --namespace cdi \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=storage \
+  --timeout=90s
+
+kubectl get pods -n cdi
+
+echo ""
+echo "*** CREATING CDI UPLOAD PROXY... ***"
+echo ""
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Service
+metadata:
+  name: cdi-uploadproxy-nodeport
+  namespace: cdi
+  labels:
+    cdi.kubevirt.io: "cdi-uploadproxy"
+spec:
+  type: NodePort
+  ports:
+    - port: 443
+      targetPort: 8443
+      nodePort: 31443
+      protocol: TCP
+  selector:
+    cdi.kubevirt.io: cdi-uploadproxy
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cdi-ingress
+  namespace: cdi
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /cdi
+        pathType: Prefix
+        backend:
+          service:
+            name: cdi-uploadproxy
+            port:
+              number: 443
+EOF
+
+kubectl get all -n cdi
+
+echo ""
+echo "*** UPDATING STORAGE PROFILE... ***"
+echo ""
+
+sleep 30
+
+cat <<EOF | kubectl replace -f -
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: StorageProfile
+metadata:
+  name: nfs-default
+spec:
+  claimPropertySets:
+  - accessModes:
+    - ReadWriteOnce
+    volumeMode: Filesystem
+EOF
+
+echo ""
+echo "*** INSTALLING VIRTCTL... ***"
+echo ""
+
+VERSION=$(kubectl get kubevirt.kubevirt.io/kubevirt -n kubevirt -o=jsonpath="{.status.observedKubeVirtVersion}")
+echo $VERSION
+ARCH=$(uname -s | tr A-Z a-z)-$(uname -m | sed 's/x86_64/amd64/') || windows-amd64.exe
+echo ${ARCH}
+
+curl -L -o virtctl https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/virtctl-${VERSION}-${ARCH}
+chmod +x virtctl
+
+sudo install virtctl /usr/local/bin
+
+
+echo ""
+echo "*** INSTALLING DASHBOARD... ***"
+echo ""
+
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard -n kube-dashboard --create-namespace --set=service.externalPort=8443
+
+cat <<EOF | kubectl apply -f -
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dashboard
+  namespace: kube-dashboard
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: dashboard.k8s.lab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes-dashboard
+            port:
+              number: 8443
+EOF
+
+cat <<EOF | kubectl apply -f -
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kube-dashboard
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-user-secret
+  namespace: kube-dashboard
+  annotations:
+    kubernetes.io/service-account.name: admin-user
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kube-dashboard
+EOF
+
+kubectl describe serviceaccount admin-user -n kube-dashboard
+kubectl describe secret admin-user-secret -n kube-dashboard
