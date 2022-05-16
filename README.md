@@ -5,7 +5,8 @@ Includes Flannel, Multus, NGINX Ingress, K8s Dashboard, and KubeVirt
 Installation steps:
 
 1. Prepare 4 Ubuntu 20.04 servers: 1x control, 2x workers, 1x NFS server
-2. Install NFS server on NFS server node:
+
+3. Install NFS server on NFS server node:
 
 wget https://raw.githubusercontent.com/rkrisman/k8s/main/nfsserverinstall
 chmod +x nfsserverinstall
@@ -26,7 +27,15 @@ chmod +x k8sworkerinstall
 
 ./k8sworkerinstall -h worker2 -i 172.31.254.12 -r 1.23.6 -s 172.31.254.9
 
-5. Install K8s addons on control node:
+5. Joing K8s workers to cluster:
+Look for the output at the end of the K8s cluster node installation for an instruction to join the cluster like the following. Ensure to run the command using sudo.
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+sudo kubeadm join 172.31.254.1:6443 --token xxxxx \
+        --discovery-token-ca-cert-hash xxxxx
+
+6. Install K8s addons on control node:
 
 wget https://raw.githubusercontent.com/rkrisman/k8s/main/k8saddonsinstall
 chmod +x k8saddonsinstall
