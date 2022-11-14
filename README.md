@@ -16,21 +16,29 @@ Installation steps:
 3. Install NFS server on NFS server node:
 
 sudo su
+
 wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/nfsserverinstall
+
 chmod +x nfsserverinstall
+
 ./nfsserverinstall -h nfs -i 172.31.254.9 -p /data/nfs1 -n 172.31.254.0/24
 
 4. Install K8s cluster on control node:
 
 sudo su
+
 wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8scontrolinstall
+
 chmod +x k8scontrolinstall
+
 ./k8scontrolinstall -h control -i 172.31.254.1 -r 1.23.6 -n 172.30.0.0/16
 
 5. Install K8s on worker nodes:
 
 sudo su
+
 wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8sworkerinstall
+
 chmod +x k8sworkerinstall
 
 ./k8sworkerinstall -h worker1 -i 172.31.254.11 -r 1.23.6 -s 172.31.254.9
@@ -39,11 +47,12 @@ chmod +x k8sworkerinstall
 
 6. Join K8s workers to cluster: Look for the output at the end of the K8s cluster node installation for an instruction to join the cluster like the following. Ensure to run the command using sudo. Then you can join any number of worker nodes by running the following on each as root:
 
-sudo kubeadm join 172.31.254.1:6443 --token xxxxx
---discovery-token-ca-cert-hash xxxxx
+sudo kubeadm join 172.31.254.1:6443 --token xxxxx --discovery-token-ca-cert-hash xxxxx
 
 7. Install K8s addons on control node:
 
 wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8saddonsinstall
+
 chmod +x k8saddonsinstall
+
 ./k8saddonsinstall -s 172.31.254.9 -p /data/nfs1
