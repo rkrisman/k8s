@@ -60,6 +60,8 @@ sudo kubeadm join 172.31.254.1:6443 --token xxxxx --discovery-token-ca-cert-hash
 
 7. Install K8s addons on control node:
 
+echo -e "fortinet" | sudo -S su
+
 wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8saddonsinstall
 
 chmod +x k8saddonsinstall
