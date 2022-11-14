@@ -7,13 +7,13 @@ Installation steps:
 
 1. Prepare 4 Ubuntu 20.04 servers: 1x control, 2x workers, 1x NFS server
 
-2. Assign static IP addresses to all 4 servers as follows:
+2. Assign static IP addresses to all 4 servers, such as the following:
 - control - 172.31.254.1/24
 - nfs - 172.31.254.9/24
 - worker1 - 172.31.254.11/24
 - worker2 - 172.31.254.12/24
 
-3. Install NFS server on NFS server node:
+3. Install NFS server on the NFS server node:
 
 echo -e "<password>" | sudo -S su
 
@@ -21,9 +21,12 @@ wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/nfsserverinstall
 
 chmod +x nfsserverinstall
 
+./nfsserverinstall -h nfs -i <nfs-node-ip> -p <nfs-share> -n <allowed-cidr>
+
+Example:
 ./nfsserverinstall -h nfs -i 172.31.254.9 -p /data/nfs1 -n 172.31.254.0/24
 
-4. Install K8s cluster on control node:
+4. Install K8s on control node:
 
 echo -e "<password>" | sudo -S su
 
@@ -56,7 +59,11 @@ worker2 example:
 
 6. Join K8s workers to cluster: Look for the output at the end of the K8s cluster node installation for an instruction to join the cluster like the following. Ensure to run the command using sudo. Then you can join any number of worker nodes by running the following on each as root:
 
-sudo kubeadm join 172.31.254.1:6443 --token xxxxx --discovery-token-ca-cert-hash xxxxx
+sudo kubeadm join <control-node-ip>:6443 --token xxxxx --discovery-token-ca-cert-hash xxxxx
+
+Example:
+sudo kubeadm join 172.31.254.1:6443 --token e9jsaq.m6ctbxe0gznirlpf \
+        --discovery-token-ca-cert-hash sha256:754ea651bbb2cdd0a5a3639d700a4af0f3418f8f3c1804156fd0573b9338eedc
 
 7. Install K8s addons (NFS Provisioner, Ingress NGINX, KubeVirt, CDI, Dashboard) on control node:
 
@@ -66,12 +73,18 @@ wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8saddonsinstall
 
 chmod +x k8saddonsinstall
 
+./k8saddonsinstall -s <nfs-node-ip> -p <nfs-share>
+
+Example:
 ./k8saddonsinstall -s 172.31.254.9 -p /data/nfs1
 
 8. Configure static host mapping for the K8s Dashboard:
 
 edit /etc/hosts in Linux or C:\Windows\System32\drivers\etc\hosts in Windows to include the following entry
 
+<control-node-ip>  dashboard.k8s.lab
+
+Example:
 172.31.254.1  dashboard.k8s.lab
 
 Then, access the K8s Dashboard by browsing to https://dashboard.k8s.lab:30443
