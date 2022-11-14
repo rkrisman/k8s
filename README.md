@@ -1,4 +1,4 @@
-# Installing K8s Cluster on Ubuntu 20.04 in 7 Easy Steps
+# Installing K8s Cluster on Ubuntu 20.04 in 8 Easy Steps
 
 Kubernetes cluster install scripts with 1 control, 2 worker, and 1 NFS nodes
 Includes Flannel, Multus, NGINX Ingress, K8s Dashboard, and KubeVirt
@@ -67,3 +67,11 @@ wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8saddonsinstall
 chmod +x k8saddonsinstall
 
 ./k8saddonsinstall -s 172.31.254.9 -p /data/nfs1
+
+8. Configure static host mapping for the K8s Dashboard:
+
+edit /etc/hosts in Linux or C:\Windows\System32\drivers\etc\hosts in Windows to include the following entry
+
+172.31.254.1  dashboard.k8s.lab
+
+Then, access the K8s Dashboard by browsing to https://dashboard.k8s.lab:30443
