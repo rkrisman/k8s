@@ -1,4 +1,4 @@
-# Install a K8s Cluster on Ubuntu 20.04 in 7 Steps
+# Install a K8s Cluster on Ubuntu 20.04 in 7 Easy Steps
 
 Kubernetes cluster install scripts with 1 control, 2 worker, and 1 NFS nodes
 Includes Flannel, Multus, NGINX Ingress, K8s Dashboard, and KubeVirt
@@ -58,7 +58,7 @@ worker2 example:
 
 sudo kubeadm join 172.31.254.1:6443 --token xxxxx --discovery-token-ca-cert-hash xxxxx
 
-7. Install K8s addons on control node:
+7. Install K8s addons (NFS Provisioner, Ingress NGINX, KubeVirt, CDI, Dashboard) on control node:
 
 echo -e "fortinet" | sudo -S su
 
