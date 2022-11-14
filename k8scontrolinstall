@@ -209,7 +209,7 @@ echo ""
 echo "*** INSTALLING MULTUS CNI... ***"
 echo ""
 
-kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick-plugin.yml
+kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
 
 echo ""
 echo "*** VERIFYING K8S STATE... ***"
@@ -222,7 +222,7 @@ kubectl wait --namespace kube-system \
   --selector=k8s-app=kube-dns \
   --timeout=90s
 
-kubectl wait --namespace kube-system \
+kubectl wait --namespace kube-flannel \
   --for=condition=ready pod \
   --selector=app=flannel \
   --timeout=90s
