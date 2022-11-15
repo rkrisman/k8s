@@ -205,7 +205,7 @@ sudo tar -xvzf cni-plugins-linux-amd64-v1.1.1.tgz -C /opt/cni/bin
 
 echo '{
     "cniVersion": "1.0.0",
-    "name": "data",
+    "name": "ingress",
     "type": "bridge",
     "bridge": "cni_ingress",
     "promiscMode": true,
@@ -228,7 +228,7 @@ echo '{
 },
 {
     "cniVersion": "1.0.0",
-    "name": "data",
+    "name": "egress",
     "type": "bridge",
     "bridge": "cni_egress",
     "promiscMode": true,
@@ -248,7 +248,7 @@ echo '{
                 { "dst": "0.0.0.0/0" }
         ]
     }
-}' | sudo tee /etc/cni/net.d/10-bridge.conf
+}' | sudo tee /etc/cni/net.d/20-bridge.conf
 
 echo ""
 echo "*** INSTALLING FLANNEL CNI... ***"
