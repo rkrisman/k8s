@@ -163,7 +163,7 @@ echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt
 sudo apt update
 sudo apt -y install vim git wget kubelet=$releaseNumber-00 kubeadm=$releaseNumber-00 kubectl=$releaseNumber-00
 sudo apt-mark hold kubelet kubeadm kubectl
-kubectl version && kubeadm version
+kubectl version --short && kubeadm version
 
 echo ""
 echo "*** INITIALIZING K8S CLUSTER... ***"
