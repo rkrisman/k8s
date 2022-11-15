@@ -4,19 +4,19 @@
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -w1 Worker1 hostname -w2 Worker2 hostname -i Ingress port -e Egress port"
-   echo -e "\t-w1 Worker1 hostname"
-   echo -e "\t-w2 Worker2 hostname"
+   echo "Usage: $0 -a Worker1 hostname -b Worker2 hostname -i Ingress port -e Egress port"
+   echo -e "\t-a Worker1 hostname"
+   echo -e "\t-b Worker2 hostname"
    echo -e "\t-i Ingress port"
    echo -e "\t-e Egress port"
    exit 1 # Exit script after printing help
 }
 
-while getopts "w1:w2:i:e:" opt
+while getopts "a:b:i:e:" opt
 do
    case "$opt" in
-      w1 ) export worker1="$OPTARG" ;;
-      w2 ) export worker2="$OPTARG" ;;
+      a ) export worker1="$OPTARG" ;;
+      b ) export worker2="$OPTARG" ;;
       i ) export ingress="$OPTARG" ;;
       e ) export egress="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
