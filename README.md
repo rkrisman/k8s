@@ -1,7 +1,6 @@
-# Installing K8s Cluster on Ubuntu 20.04 in 8 Easy Steps
+# Installing K8s Cluster on Ubuntu 20.04 in 9 Easy Steps
 
-Kubernetes cluster install scripts with 1 control, 2 worker, and 1 NFS nodes
-Includes Flannel, Multus, NGINX Ingress, K8s Dashboard, and KubeVirt
+Kubernetes cluster install scripts with 1 control, 2 worker, and 1 NFS nodes. Includes Flannel, Multus, Linux Bridge, NGINX Ingress, K8s Dashboard, and KubeVirt
 
 Installation steps:
 
@@ -17,7 +16,7 @@ Installation steps:
 
 echo -e "{password}" | sudo -S su
 
-wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/nfsserverinstall
+wget --no-cache https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/nfsserverinstall
 
 chmod +x nfsserverinstall
 
@@ -30,7 +29,7 @@ Example:
 
 echo -e "{password}" | sudo -S su
 
-wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8scontrolinstall
+wget --no-cache https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8scontrolinstall
 
 chmod +x k8scontrolinstall
 
@@ -44,7 +43,7 @@ Example:
 
 echo -e "{password}" | sudo -S su
 
-wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8sworkerinstall
+wget --no-cache https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8sworkerinstall
 
 chmod +x k8sworkerinstall
 
@@ -65,11 +64,23 @@ Example:
 sudo kubeadm join 172.31.254.1:6443 --token e9jsaq.m6ctbxe0gznirlpf \
         --discovery-token-ca-cert-hash sha256:754ea651bbb2cdd0a5a3639d700a4af0f3418f8f3c1804156fd0573b9338eedc
 
-7. Install K8s addons (NFS Provisioner, Ingress NGINX, KubeVirt, CDI, Dashboard) on control node:
+7. Install Linux bridges on worker nodes from control node:
 
 echo -e "{password}" | sudo -S su
 
-wget https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8saddonsinstall
+wget --no-cache https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8slinuxbridgeinstall
+
+chmod +x k8slinuxbridgeinstall
+
+./k8slinuxbridgeinstall -a {worker1-hostname} -b {worker2-hostname} -i {ingress-port} -e {egress-port}
+
+./k8slinuxbridgeinstall -a worker1 -b worker2 -i ens4 -e ens5
+
+8. Install K8s addons (NFS Provisioner, Ingress NGINX, KubeVirt, CDI, Dashboard) on control node:
+
+echo -e "{password}" | sudo -S su
+
+wget --no-cache https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/k8saddonsinstall
 
 chmod +x k8saddonsinstall
 
@@ -78,7 +89,7 @@ chmod +x k8saddonsinstall
 Example:
 ./k8saddonsinstall -s 172.31.254.9 -p /data/nfs1
 
-8. Configure static host mapping for the K8s Dashboard:
+9. Configure static host mapping for the K8s Dashboard:
 
 edit /etc/hosts in Linux or C:\Windows\System32\drivers\etc\hosts in Windows to include the following entry
 
