@@ -4,9 +4,9 @@
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -w1 Worker 1 hostname -w2 Worker 2 hostname -i Ingress port -e Egress port"
-   echo -e "\t-w1 Worker 1 hostname"
-   echo -e "\t-w2 Worker 1 hostname"
+   echo "Usage: $0 -w1 Worker1 hostname -w2 Worker2 hostname -i Ingress port -e Egress port"
+   echo -e "\t-w1 Worker1 hostname"
+   echo -e "\t-w2 Worker2 hostname"
    echo -e "\t-i Ingress port"
    echo -e "\t-e Egress port"
    exit 1 # Exit script after printing help
@@ -34,8 +34,8 @@ fi
 echo ""
 echo "*** READY TO START INSTALLATION ***"
 echo ""
-echo "- Worker 1 hostnme is $worker1"
-echo "- Worker 2 hostnme is $worker2"
+echo "- Worker1 hostnme is $worker1"
+echo "- Worker2 hostnme is $worker2"
 echo "- Ingress port is $ingress"
 echo "- Egress port is $egress"
 echo ""
