@@ -12,7 +12,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "s:p:" opt
+while getopts "w1:w2:i:o:" opt
 do
    case "$opt" in
       w1 ) export worker1="$OPTARG" ;;
