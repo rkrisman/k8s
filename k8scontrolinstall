@@ -206,12 +206,6 @@ sed -i 's+"Network": "10.244.0.0/16"+"Network": "'$podCIDR'"+g' kube-flannel.yml
 kubectl create -f kube-flannel.yml
 
 echo ""
-echo "*** INSTALLING MULTUS CNI... ***"
-echo ""
-
-kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
-
-echo ""
 echo "*** VERIFYING K8S STATE... ***"
 echo ""
 
