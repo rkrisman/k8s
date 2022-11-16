@@ -239,4 +239,4 @@ kubectl wait --namespace kube-system \
   --selector=app=multus \
   --timeout=90s
 
-kubectl get pods -n kube-system
+kubectl get pods -A
