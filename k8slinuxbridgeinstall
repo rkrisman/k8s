@@ -69,6 +69,8 @@ echo ""
 echo "*** VERIFYING NMSTATE... ***"
 echo ""
 
+sleep 30
+
 kubectl wait --namespace nmstate \
   --for=condition=ready pod \
   --selector=app=kubernetes-nmstate \
