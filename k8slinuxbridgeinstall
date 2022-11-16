@@ -66,6 +66,15 @@ metadata:
 EOF
 
 echo ""
+echo "*** VERIFYING NMSTATE... ***"
+echo ""
+
+kubectl wait --namespace nmstate \
+  --for=condition=ready pod \
+  --selector=app=kubernetes-nmstate \
+  --timeout=90s
+
+echo ""
 echo "*** CREATING LINUX BRIDGES FOR INGRESS... ***"
 echo ""
 
