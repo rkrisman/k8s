@@ -81,7 +81,7 @@ echo ""
 echo "*** VERIFYING INGRESS NGINX... ***"
 echo ""
 
-sleep 30
+sleep 60
 
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
@@ -183,7 +183,7 @@ echo ""
 echo "*** UPDATING STORAGE PROFILE... ***"
 echo ""
 
-sleep 30
+sleep 60
 
 cat <<EOF | kubectl replace -f -
 apiVersion: cdi.kubevirt.io/v1beta1
