@@ -140,4 +140,4 @@ echo ""
 
 kubectl wait nncp egress --for condition=Available --timeout 2m
 
-kubectlget nnce
+kubectl get nnce
