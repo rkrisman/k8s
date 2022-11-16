@@ -51,12 +51,15 @@ echo ""
 echo "*** INSTALLING NMSTATE... ***"
 echo ""
 
-kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/v0.74.0/nmstate.io_nmstates.yaml
-kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/v0.74.0/namespace.yaml
-kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/v0.74.0/service_account.yaml
-kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/v0.74.0/role.yaml
-kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/v0.74.0/role_binding.yaml
-kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/v0.74.0/operator.yaml
+export VERSION=$(curl -s https://api.github.com/repos/nmstate/kubernetes-nmstate/releases | grep tag_name | grep -v -- '-rc' | grep -v -- 'alpha' | head -1 | awk -F': ' '{print $2}' | sed 's/,//' | xargs)
+echo $VERSION
+
+kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/${VERSION}nmstate.io_nmstates.yaml
+kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/${VERSION}/namespace.yaml
+kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/${VERSION}/service_account.yaml
+kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/${VERSION}/role.yaml
+kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/${VERSION}/role_binding.yaml
+kubectl apply -f https://github.com/nmstate/kubernetes-nmstate/releases/download/${VERSION}/operator.yaml
 
 cat <<EOF | kubectl create -f -
 apiVersion: nmstate.io/v1
