@@ -139,3 +139,5 @@ echo "*** VERIFYING EGRESS BRIDGE... ***"
 echo ""
 
 kubectl wait nncp egress --for condition=Available --timeout 2m
+
+kubectlget nnce
