@@ -127,7 +127,7 @@ echo ""
 echo "*** VERIFYING CDI... ***"
 echo ""
 
-sleep 30
+sleep 60
 
 kubectl wait --namespace cdi \
   --for=condition=ready pod \
