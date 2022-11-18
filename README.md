@@ -4,7 +4,7 @@ Kubernetes cluster install scripts with 1 control, 2 worker, and 1 NFS nodes. In
 
 Installation steps:
 
-##1. Prepare 4 Ubuntu 20.04 servers: 1x control, 2x workers, 1x NFS server
+## 1. Prepare 4 Ubuntu 20.04 servers: 1x control, 2x workers, 1x NFS server
 
 2. Assign static IP addresses to all 4 servers, such as the following:
 - control - 172.31.254.1/24
