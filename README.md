@@ -14,13 +14,10 @@ Installation steps:
 
 3. Install NFS server on the NFS server node:
 
-echo -e "{password}" | sudo -S su
-
+`echo -e "{password}" | sudo -S su
 wget --no-cache https://raw.githubusercontent.com/rkrisman/k8s1c2wnfs/main/nfsserverinstall
-
 chmod +x nfsserverinstall
-
-./nfsserverinstall -h nfs -i {nfs-node-ip} -p {nfs-share} -n {allowed-cidr}
+./nfsserverinstall -h nfs -i {nfs-node-ip} -p {nfs-share} -n {allowed-cidr}`
 
 Example:
 ./nfsserverinstall -h nfs -i 172.31.254.9 -p /data/nfs1 -n 172.31.254.0/24
